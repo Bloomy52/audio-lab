@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+test-results/
+playwright-report/
+tests/fixtures.local.json
+artifacts/

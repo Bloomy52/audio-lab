@@ -1,0 +1,39 @@
+{
+  "name": "audio-lab",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint src tests scripts vite.config.ts playwright.config.ts",
+    "preview": "vite preview",
+    "test": "node --test tests/audio.test.mjs tests/engine.test.mjs tests/player.test.mjs",
+    "test:fixtures": "node --test tests/fixtures.test.mjs",
+    "test:browser": "playwright test",
+    "sync:engine": "node scripts/sync-engine.mjs",
+    "prebuild": "npm run sync:engine",
+    "predev": "npm run sync:engine"
+  },
+  "dependencies": {
+    "@ffmpeg/core": "0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@tailwindcss/vite": "^4.3.3",
+    "jszip": "^3.10.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}
