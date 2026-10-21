@@ -6,14 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint src tests scripts vite.config.ts playwright.config.ts",
+    "lint": "oxlint src tests scripts local vite.config.ts playwright.config.ts",
     "preview": "vite preview",
     "test": "node --test tests/audio.test.mjs tests/engine.test.mjs tests/player.test.mjs",
     "test:fixtures": "node --test tests/fixtures.test.mjs",
     "test:browser": "playwright test",
     "sync:engine": "node scripts/sync-engine.mjs",
     "prebuild": "npm run sync:engine",
-    "predev": "npm run sync:engine"
+    "predev": "npm run sync:engine",
+    "package:local": "npm run build && node scripts/package-local.mjs"
   },
   "dependencies": {
     "@ffmpeg/core": "0.12.10",
