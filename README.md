@@ -1,48 +1,79 @@
 # Audio Lab
-A local browser audio converter and loop editor.
 
-## How To Use Audio Lab
+A browser-based audio converter and loop editor. Files are processed locally with FFmpeg compiled to WebAssembly and are never uploaded.
 
-1. **Open Audio Lab** in your browser. You can use either of the two options below.
-2. **Choose a tool:** Batch Converter to convert files, or Loop & Edit Studio to edit a loop.
-3. **Add your audio** by dragging it in or choosing a file.
-4. **Make your changes:** choose an output format, or set the loop’s start and end.
-5. **Preview the audio** to check how it sounds.
-6. **Convert or export**, then download your finished files.
+**[Open Audio Lab](https://bloomy52.github.io/audio-lab)** · [Download the Local Edition](https://github.com/bloomy52/audio-lab/releases/latest)
 
-Make sure to save your downloads before closing or refreshing the page.
+## Features
 
-## Accessing Audio Lab
-As mentioned earlier, there are two ways you can access Audio Lab. You can either use the 
-GitHub Pages version or you can use the Local Edition. Instructions for both options are below.
+- **Batch converter:** convert up to 50 audio or video files at once, then download the results individually or as a ZIP.
+- **Loop & edit studio:** set loop points on a zoomable waveform, audition the loop, and export with the markers embedded.
+- **Loop marker support:** reads and writes loop points for WAV, AIFF, FLAC, Ogg Vorbis, and Opus.
+- **Export tools:** optional dynamic range compressor, loudness normalization toward −16 LUFS, and a final peak limiter.
+- **Wide format support:** WAV, AIFF, FLAC, ALAC, MP3, Ogg Vorbis, Opus, AAC (M4A and ADTS), WebM Audio, WMA, AC3, and raw PCM.
+- **Private by design:** nothing leaves your device, and nothing is stored between sessions.
 
-### GitHub Pages (Recommended)
-The GitHub Pages version of Audio Lab can be found at [https://bloomy52.github.io/audio-lab](https://bloomy52.github.io/audio-lab).
-This version does not require any installation and can be accessed directly from your browser.
+## Getting started
+
+### Hosted version (recommended)
+
+Visit [bloomy52.github.io/audio-lab](https://bloomy52.github.io/audio-lab). No installation is required.
 
 ### Local Edition
-You can download the local edition of Audio Lab from [GitHub Releases](https://github.com/bloomy52/audio-lab/releases/latest).
-Once installed, extract the folder and run `npm install` followed by `npm start` in the terminal. 
-This will open Audio Lab in your default browser.
-You can find more information for using the Local Edition in the [START-HERE.md](local/START-HERE.md) file.
 
-## Editing and output behavior
+The Local Edition runs the same app from a small server on your own machine. It requires [Node.js](https://nodejs.org/) 24 or newer.
 
-- Studio preserves the source sample rate during native decoding, with an FFmpeg PCM fallback for formats the browser cannot decode. Audio tracks in multi-stream files can be selected. Editing supports mono/stereo; multichannel inputs must be downmixed in Batch first.
-- Whole-track export keeps the intro/tail and writes the selected loop markers. Loop-region export crops the selection and can repeat it 1/2/4/8 times.
-- Crossfade defaults to **off**, so trusted markers and loop timing are not changed automatically. Optional linear overlap crossfade is bounded to half the selection and shortens each repetition by the displayed overlap. Audition the prepared loop before exporting. It does not promise to eliminate every possible click.
-- Zero-crossing snap is optional, stays within valid bounds, and reports when no crossing was found. A channel-1 crossing does not guarantee matching stereo phase.
-- Compressor and loudness normalization are **export-only**. They retain the selected output sample rate and include a final peak limiter. Listen to the rendered output to hear their effect. Single-pass loudness normalization targets −16 LUFS; source duration/content can prevent an exact integrated loudness result.
-- Region processing uses a worker and floating-point intermediates. Explicit 16/24/32-bit integer PCM output is available for WAV/AIFF. FLAC/ALAC use 16 or 24 bits. No “bit-perfect” claim is made for processing, resampling, downmixing, or bit-depth reduction. Whole-track unprocessed 16-bit lossless conversions were independently checked for identical PCM.
-- Supported outputs: WAV, AIFF, FLAC, ALAC/M4A, MP3, Ogg Vorbis, Opus, AAC/M4A, AAC/ADTS, WebM Audio, WMA, AC3, and signed 16-bit little-endian raw PCM. AMR is not available in the engine build. Raw output requires recording the displayed sample rate/channels for re-import.
-- Only verified mode/rate combinations are offered. An incompatible source rate is explicitly resampled with a result notice. Opus/WebM use explicit 10 ms frames because default 20 ms stereo encoding crashes the pinned engine in regression tests. All outputs explicitly exclude image/video, subtitle, and data streams, including album artwork.
-- Loop metadata is supported for WAV `smpl`, AIFF MARK/INST, FLAC comments, Vorbis comments, and Opus comments. Coordinates are scaled after resampling. Unsupported loop types or malformed metadata are reported; multiple/release/reverse/ping-pong/finite loops are not faithfully preserved. Non-loop descriptive metadata and artwork are not copied to outputs.
-- Size mode uses actual probed duration and **decimal MB**, validates final file bytes, and retries within bounds. An impossible budget fails clearly instead of silently returning an oversized file. Codec bitrate constraints may require choosing another format or larger budget.
+1. Download the latest ZIP from [GitHub Releases](https://github.com/bloomy52/audio-lab/releases/latest) and extract it.
+2. In the extracted folder, run `npm install`, then `npm start`.
 
-## Resource and session limits
+Audio Lab opens in your default browser. See [`local/START-HERE.md`](local/START-HERE.md) for detailed, step-by-step instructions.
 
-128 MiB input per file; 192 MiB queued batch input and retained outputs; at most 50 batch entries. Studio checks a 192 MiB working-PCM allocation budget, including repeat preparation. These conservative limits reduce browser crashes but do not guarantee enough memory on every device. ZIP generation is limited by the retained output budget and cannot be cancelled once JSZip starts; errors and progress are shown.
+## Usage
 
-Workspaces remain mounted when switching tabs; background jobs are serialized and can be cancelled. A hidden studio pauses audio playback. Refreshing/closing the page clears the session, so download results first. The app does not persist private audio in browser storage. Completed batch files retain their applied settings and unique filenames; remove/re-add sources to reconvert them.
+1. Choose a workspace: **Batch converter** or **Loop & edit studio**.
+2. Add audio by dragging a file in or browsing for one.
+3. Pick an output format and settings, or set the loop start and end.
+4. Preview the result.
+5. Export and download your files.
 
-Source preview and rendered output have separate players. Browser playback support depends on the output codec; a valid download may be unsupported by the browser audio element.
+> Your session is cleared when you refresh or close the page. Download your results first.
+
+## Behavior notes
+
+### Loop editing
+
+- Loop end frames are **exclusive** everywhere in the interface.
+- Imported loop markers are kept exactly as authored. They are never snapped or crossfaded automatically.
+- Zero-crossing snap is optional and works on channel 1 only, so it cannot guarantee a click-free stereo join.
+- Whole-track export keeps the intro and tail and writes your loop markers. Region export crops to the selection and can repeat it 1, 2, 4, or 8 times.
+- Overlap crossfade is off by default. When enabled, each repetition is shortened by the overlap length. Audition the loop before exporting.
+- Editing supports mono and stereo. Downmix multichannel files in the Batch converter first.
+
+### Export
+
+- The compressor and loudness normalization apply to exports only. Listen to the rendered file to hear their effect.
+- Single-pass normalization targets −16 LUFS. Short or unusual material may not land exactly on target.
+- Processing and resampling are not bit-perfect, so no such claim is made for them.
+- Output contains audio only. Artwork, video, subtitle, and data streams are excluded.
+- Descriptive metadata is not copied to outputs. Loop markers are preserved where the format supports them, and positions are rescaled after resampling.
+- Only one loop is preserved. Reverse, ping-pong, finite, and release loops are reported and ignored.
+- Raw PCM export is headerless signed 16-bit little-endian. Note the sample rate and channel count shown with the result when importing it elsewhere.
+- AMR export is not available in the bundled FFmpeg build.
+- File-size mode targets decimal megabytes and checks the actual output size. If the budget can't be met, it fails with an explanation instead of returning an oversized file.
+
+### Limits
+
+| Limit | Value |
+| --- | --- |
+| Input file size | 128 MiB |
+| Batch queue | 50 files, 192 MiB total input |
+| Retained batch output | 192 MiB |
+| Studio working memory | 192 MiB of PCM, including repeats |
+
+These limits reduce the risk of browser crashes but can't guarantee enough memory on every device. Jobs run one at a time and can be cancelled, except ZIP creation, which cannot be cancelled once it starts.
+
+Browser playback depends on the codec. An exported file can be valid even if the in-page player can't play it.
+
+## License
+
+Add your license here. The bundled FFmpeg core (`@ffmpeg/core`) is GPL-2.0-or-later, which affects how you can distribute builds that include it.
