@@ -1,0 +1,74 @@
+name: Release Audio Lab Local Edition
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - name: Build local ZIP from the tagged source
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: npm run package:local -- "$RELEASE_TAG"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - name: Extract the release ZIP
+        run: unzip artifacts/audio-lab-local-*.zip -d "$RUNNER_TEMP/local-release"
+      - name: Install local edition dependencies as a user would
+        working-directory: ${{ runner.temp }}/local-release/audio-lab-local
+        run: npm install --no-audit --no-fund
+      - name: Check the installed local edition
+        run: node scripts/check-local.mjs "$RUNNER_TEMP/local-release/audio-lab-local"
+      - name: Create checksum
+        working-directory: artifacts
+        run: sha256sum audio-lab-local-*.zip > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-release
+          path: |
+            artifacts/audio-lab-local-*.zip
+            artifacts/SHA256SUMS.txt
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: local-release
+          path: artifacts
+      - name: Create GitHub Release for the tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          options=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            options+=(--prerelease)
+          fi
+          gh release create "$RELEASE_TAG" artifacts/* \
+            --verify-tag --title "Audio Lab $RELEASE_TAG" \
+            --generate-notes "${options[@]}"
