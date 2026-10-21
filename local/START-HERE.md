@@ -1,6 +1,9 @@
 # Audio Lab Local Edition
 
-1. Install Node.js 24 or newer (including npm) from https://nodejs.org/.
+## Requirements
+This reqires Node.js 24 or newer (including npm) to run. If you have not instaled Node.js, please download it from https://nodejs.org/ and install it before proceeding.
+
+1. Download the latest release of Audio Lab Local Edition from [GitHub Releases](https://github.com/bloomy52/audio-lab/releases/latest).
 2. Extract the entire ZIP into a writable folder.
 3. Open a terminal in that folder. On Windows, open the folder in File Explorer,
    right-click an empty area and choose **Open in Terminal**. On macOS/Linux,
