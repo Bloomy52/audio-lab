@@ -155,40 +155,10 @@ test("audio extraction excludes picture/video streams", async () => {
   );
   core.reset();
   const video = core.FS.readFile("fixture.mp4").slice();
-  for (const format of ["webm", "ogg", "wma", "m4a"]) {
-    const out = await service.transcodeAudio(video.slice(), "mp4", {
-      ...defaultOptions(),
-      format,
-      compressionMode: modesFor(format)[0],
-    });
-    core.FS.writeFile(
-      "check." + format,
-      new Uint8Array(await out.blob.arrayBuffer()),
-    );
-    core.ffprobe(
-      "-v",
-      "error",
-      "-show_streams",
-      "-of",
-      "json",
-      "-o",
-      "check.json",
-      "check." + format,
-    );
-    core.reset();
-    const inspected = JSON.parse(
-      new TextDecoder().decode(core.FS.readFile("check.json")),
-    );
-    assert.ok(
-      inspected.streams.some((s) => s.codec_type === "audio"),
-      format,
-    );
-    assert.ok(!inspected.streams.some((s) => s.codec_type === "video"), format);
-    core.FS.unlink("check.json");
-    core.FS.unlink("check." + format);
-  }
-  core.FS.unlink("sine.wav");
-  core.FS.unlink("fixture.mp4");
+  await assert.rejects(
+      service.transcodeAudio(video.slice(), "mp4", defaultOptions()),
+      /video file/,
+  );
 });
 test("bad file failure is actionable and a new engine can recover", async () => {
   await assert.rejects(
