@@ -447,7 +447,7 @@ export function LoopStudio({ active = true }: { active?: boolean }) {
         }}
       >
         <button disabled={exporting} onClick={() => input.current?.click()}>
-          {track ? "Load different file" : "Browse audio or video"}
+          {track ? "Load different file" : "Browse audio"}
         </button>
         <p>Or drop a file here · 128 MiB input maximum · mono/stereo editing</p>
         <input
@@ -456,7 +456,7 @@ export function LoopStudio({ active = true }: { active?: boolean }) {
           hidden
           tabIndex={-1}
           aria-label="Studio audio file"
-          accept="audio/*,video/*,.aif,.aiff,.flac,.m4a,.mkv,.opus"
+          accept="audio/*,.aif,.aiff,.flac,.m4a,.opus"
           onChange={(e) => {
             const file = e.target.files?.[0];
             e.target.value = "";

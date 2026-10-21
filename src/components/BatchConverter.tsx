@@ -227,7 +227,7 @@ export function BatchConverter() {
         }}
       >
         <button disabled={busy} onClick={() => input.current?.click()}>
-          Select audio or video files
+          Select audio files
         </button>
         <p>
           Or drop files here · 128 MiB per file · 192 MiB total input · 50 files
@@ -237,7 +237,7 @@ export function BatchConverter() {
           ref={input}
           type="file"
           multiple
-          accept="audio/*,video/*,.aif,.aiff,.flac,.m4a,.mkv,.opus"
+          accept="audio/*,.aif,.aiff,.flac,.m4a,.opus"
           hidden
           tabIndex={-1}
           aria-label="Batch audio files"

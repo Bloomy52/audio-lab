@@ -204,6 +204,14 @@ export class FFmpegService {
     } finally {
       await this.clean(engine, [output]);
     }
+    const hasVideo = (probe.streams ?? []).some(
+        (s: any) =>
+            s.codec_type === "video" && s.disposition?.attached_pic !== 1,
+    );
+    if (hasVideo)
+      throw new Error(
+          "This looks like a video file. Audio Lab only works with audio files.",
+      );
     const audio = (probe.streams ?? []).filter(
       (s: any) => s.codec_type === "audio",
     );
