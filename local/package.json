@@ -1,0 +1,12 @@
+{
+  "name": "audio-lab-local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "postinstall": "node setup.mjs",
+    "start": "node server.mjs"
+  },
+  "dependencies": { "@ffmpeg/core": "0.12.10" }
+}
