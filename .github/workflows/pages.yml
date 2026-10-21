@@ -2,8 +2,6 @@ name: Test and deploy Audio Lab
 on:
   push:
     branches: [main]
-  pull_request:
-  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -22,11 +20,9 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
         with:
           path: dist
   deploy:
-    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     permissions:
