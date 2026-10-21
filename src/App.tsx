@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { version } from "../package.json";
 import { Header } from "./components/Header";
 import { LoopStudio } from "./components/LoopStudio";
 import { BatchConverter } from "./components/BatchConverter";
@@ -16,7 +17,7 @@ export function App() {
         </div>
       </main>
       <footer>
-        Audio Lab · Files stay on your device · Download results before closing
+        Audio Lab v{version} · Files stay on your device · Download results before closing
         or refreshing this page
       </footer>
     </div>
