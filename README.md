@@ -6,7 +6,7 @@ A browser-based audio converter and loop editor. Files are processed locally wit
 
 ## Features
 
-- **Batch converter:** convert up to 50 audio or video files at once, then download the results individually or as a ZIP.
+- **Batch converter:** convert up to 50 audio files at once, then download the results individually or as a ZIP.
 - **Loop & edit studio:** set loop points on a zoomable waveform, audition the loop, and export with the markers embedded.
 - **Loop marker support:** reads and writes loop points for WAV, AIFF, FLAC, Ogg Vorbis, and Opus.
 - **Export tools:** optional dynamic range compressor, loudness normalization toward −16 LUFS, and a final peak limiter.
@@ -54,7 +54,7 @@ Audio Lab opens in your default browser. See [`local/START-HERE.md`](local/START
 - The compressor and loudness normalization apply to exports only. Listen to the rendered file to hear their effect.
 - Single-pass normalization targets −16 LUFS. Short or unusual material may not land exactly on target.
 - Processing and resampling are not bit-perfect, so no such claim is made for them.
-- Output contains audio only. Artwork, video, subtitle, and data streams are excluded.
+- Output contains audio only. Artwork and other data streams are excluded.
 - Descriptive metadata is not copied to outputs. Loop markers are preserved where the format supports them, and positions are rescaled after resampling.
 - Only one loop is preserved. Reverse, ping-pong, finite, and release loops are reported and ignored.
 - Raw PCM export is headerless signed 16-bit little-endian. Note the sample rate and channel count shown with the result when importing it elsewhere.
