@@ -61,8 +61,8 @@ Source preview and rendered output have separate players. Browser playback suppo
 
 ## GitHub Pages
 
-The included `.github/workflows/pages.yml` runs lint, unit/engine tests, the build, and Chromium tests. On a push to `main`, a successful build uploads `dist` and deploys it with GitHub Pages. Set repository **Settings → Pages → Source → GitHub Actions**. PRs run checks without deployment. Private audio fixtures are neither required in CI nor deployed.
+The included `.github/workflows/pages.yml` runs lint, unit/engine tests, the build, and Chromium tests only on pushes to `main`. A successful build uploads `dist` and deploys it with GitHub Pages. Tag pushes do not trigger another run. Private audio fixtures are neither required in CI nor deployed.
+
+The footer displays the version from `package.json`. To prepare a release, run `npm version patch` (or `minor` / `major`); npm updates the package files, commits them, and creates a local version tag. Push the commit and annotated tag together with `git push --follow-tags origin main`. The commit push builds and deploys the updated version; the tag does not create a GitHub Release automatically.
 
 Vite uses relative asset paths. `predev`/`prebuild` copy the pinned `@ffmpeg/core@0.12.10` engine into `public/ffmpeg`; `dist` includes it. The app uses the single-thread core and does not require COOP/COEP or a service-worker reload. See `public/ffmpeg/NOTICE.md` for upstream package/source references.
-
-`AUDIO_LAB_REVIEW.md` is the historical pre-fix audit; `FIX_VERIFICATION.md` records the implementation and verification status.
