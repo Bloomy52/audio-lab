@@ -1,42 +1,30 @@
 # Audio Lab
+A local browser audio converter and loop editor.
 
-A local browser audio converter and loop editor. Files are processed in Web Audio and a bundled, pinned FFmpeg WebAssembly engine; audio is never uploaded. The engine is served from this site, with no third-party CDN dependency. A browser still needs to load the site/assets; this is not an installable offline application.
+## How To Use Audio Lab
 
-## Run and verify
+1. **Open Audio Lab** in your browser. You can use either of the two options below.
+2. **Choose a tool:** Batch Converter to convert files, or Loop & Edit Studio to edit a loop.
+3. **Add your audio** by dragging it in or choosing a file.
+4. **Make your changes:** choose an output format, or set the loop’s start and end.
+5. **Preview the audio** to check how it sounds.
+6. **Convert or export**, then download your finished files.
 
-Use Node.js 24 or newer (the tests use native TypeScript type stripping).
+Make sure to save your downloads before closing or refreshing the page.
 
-```sh
-npm ci
-npm run dev
-```
+## Accessing Audio Lab
+As mentioned earlier, there are two ways you can access Audio Lab. You can either use the 
+GitHub Pages version or you can use the Local Edition. Instructions for both options are below.
 
-```sh
-npm run lint
-npm test
-npm run build
-npx playwright install chromium
-npm run test:browser
-```
+### GitHub Pages (Recommended)
+The GitHub Pages version of Audio Lab can be found at [https://bloomy52.github.io/audio-lab](https://bloomy52.github.io/audio-lab).
+This version does not require any installation and can be accessed directly from your browser.
 
-`npm test` runs deterministic audio/metadata/player tests and real conversions through the same FFmpeg WASM binary shipped to the browser. `test:browser` runs against the production build. It covers upload, source-rate decoding, marker edits, exports/downloads, ZIP uniqueness, workspace switching, cancellation, touch editing, and help-dialog behavior.
-
-Private fixture tests are optional: create `tests/fixtures.local.json` using the shape below, then run `npm run test:fixtures`. These tests require native `ffmpeg` and `ffprobe` on PATH to independently compare decoded PCM and inspect outputs. The browser suite also uses this manifest when it exists. Local paths, test outputs, and audio assets are ignored by Git; fixtures are never copied into `public/` or deployment output.
-
-```json
-[
-  {
-    "name": "trusted-loop",
-    "path": "/absolute/path/audio.wav",
-    "rate": 48000,
-    "loopStart": 313344,
-    "loopEnd": 1779528
-  },
-  { "name": "unlooped", "path": "/absolute/path/audio.flac", "rate": 44100 }
-]
-```
-
-All manifest/UI end frames are **exclusive**. WAV `smpl` stores an inclusive end, so the parser adds one and the writer subtracts one. AIFF marker positions are preserved as authored. The supplied user fixtures were checked independently before setting their expected values.
+### Local Edition
+You can download the local edition of Audio Lab from [GitHub Releases](https://github.com/bloomy52/audio-lab/releases/latest).
+Once installed, extract the folder and run `npm install` followed by `npm start` in the terminal. 
+This will open Audio Lab in your default browser.
+You can find more information for using the Local Edition in the [START-HERE.md](local/START-HERE.md) file.
 
 ## Editing and output behavior
 
@@ -58,11 +46,3 @@ All manifest/UI end frames are **exclusive**. WAV `smpl` stores an inclusive end
 Workspaces remain mounted when switching tabs; background jobs are serialized and can be cancelled. A hidden studio pauses audio playback. Refreshing/closing the page clears the session, so download results first. The app does not persist private audio in browser storage. Completed batch files retain their applied settings and unique filenames; remove/re-add sources to reconvert them.
 
 Source preview and rendered output have separate players. Browser playback support depends on the output codec; a valid download may be unsupported by the browser audio element.
-
-## GitHub Pages
-
-The included `.github/workflows/pages.yml` runs lint, unit/engine tests, the build, and Chromium tests only on pushes to `main`. A successful build uploads `dist` and deploys it with GitHub Pages. Tag pushes do not trigger another run. Private audio fixtures are neither required in CI nor deployed.
-
-The footer displays the version from `package.json`. To prepare a release, run `npm version patch` (or `minor` / `major`); npm updates the package files, commits them, and creates a local version tag. Push the commit and annotated tag together with `git push --follow-tags origin main`. The commit push builds and deploys the updated version; the tag does not create a GitHub Release automatically.
-
-Vite uses relative asset paths. `predev`/`prebuild` copy the pinned `@ffmpeg/core@0.12.10` engine into `public/ffmpeg`; `dist` includes it. The app uses the single-thread core and does not require COOP/COEP or a service-worker reload. See `public/ffmpeg/NOTICE.md` for upstream package/source references.
