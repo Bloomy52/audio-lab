@@ -9,6 +9,13 @@ test-results/
 playwright-report/
 tests/fixtures.local.json
 artifacts/
+verification/
+
+# Ignore specific files
+AUDIO_LAB_REVIEW.md
+FIX_VERIFICATION.md
+LOCAL_APP_PLAN.md
+
 
 # Created by https://gitignore.org
 # Node.gitignore
