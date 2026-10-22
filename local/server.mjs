@@ -15,7 +15,7 @@ try {
   await access(resolve(root, "ffmpeg/ffmpeg-core.wasm"));
   await access(resolve(root, "ffmpeg/ffmpeg-core.js"));
 } catch {
-  console.error("Audio Lab setup is incomplete. Run npm install in the extracted folder, then npm start.");
+  console.error("Audio Lab files are incomplete. Extract a complete Local Edition ZIP again.");
   process.exit(1);
 }
 
