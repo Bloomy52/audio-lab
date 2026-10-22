@@ -74,6 +74,9 @@ These limits reduce the risk of browser crashes but can't guarantee enough memor
 
 Browser playback depends on the codec. An exported file can be valid even if the in-page player can't play it.
 
-## License
+## Custom audio engine
+To keep size small, we built our own audio-only FFmpeg core wasm configuration.
 
-Add your license here. The bundled FFmpeg core (`@ffmpeg/core`) is GPL-2.0-or-later, which affects how you can distribute builds that include it.
+You can find more information about this build in [vendor/ffmpeg/AUDIO-BUILD.md](vendor/ffmpeg/AUDIO-BUILD.md).
+
+## License
