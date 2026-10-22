@@ -18,8 +18,7 @@ async function addTree(source, destination, exclude = () => false) {
     else if (entry.isFile()) destination.file(entry.name, await readFile(url));
   }
 }
-await addTree(new URL("dist/", root), folder.folder("app"), (name) =>
-  ["ffmpeg-core.js", "ffmpeg-core.wasm"].includes(name));
+await addTree(new URL("dist/", root), folder.folder("app"));
 await addTree(new URL("local/", root), folder, (name) =>
   ["node_modules", "app", "package.json", "package-lock.json"].includes(name));
 for (const name of ["package.json", "package-lock.json"]) {
