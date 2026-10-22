@@ -1,0 +1,80 @@
+diff --git a/build/ffmpeg-wasm.sh b/build/ffmpeg-wasm.sh
+index faa2f72..73a94f2 100755
+--- a/build/ffmpeg-wasm.sh
++++ b/build/ffmpeg-wasm.sh
+@@ -17,7 +17,6 @@ CONF_FLAGS=(
+   -Llibavfilter 
+   -Llibavformat 
+   -Llibavutil 
+-  -Llibpostproc 
+   -Llibswresample 
+   -Llibswscale 
+   -lavcodec 
+@@ -25,14 +24,12 @@ CONF_FLAGS=(
+   -lavfilter 
+   -lavformat 
+   -lavutil 
+-  -lpostproc 
+   -lswresample 
+   -lswscale 
+   -Wno-deprecated-declarations 
+   $LDFLAGS 
+   -sENVIRONMENT=worker
+   -sWASM_BIGINT                            # enable big int support
+-  -sUSE_SDL=2                              # use emscripten SDL2 lib port
+   -sSTACK_SIZE=5MB                         # increase stack size to support libopus
+   -sMODULARIZE                             # modularized to use as a library
+   ${FFMPEG_MT:+ -sINITIAL_MEMORY=1024MB}   # ALLOW_MEMORY_GROWTH is not recommended when using threads, thus we use a large initial memory
+diff --git a/build/ffmpeg.sh b/build/ffmpeg.sh
+index da89c45..52c0a38 100755
+--- a/build/ffmpeg.sh
++++ b/build/ffmpeg.sh
+@@ -29,5 +29,6 @@ CONF_FLAGS=(
+   ${FFMPEG_ST:+ --disable-pthreads --disable-w32threads --disable-os2threads}
+ )
+ 
+-emconfigure ./configure "${CONF_FLAGS[@]}" $@
+-emmake make -j
++source /src/audio-core-flags.sh
++emconfigure ./configure "${CONF_FLAGS[@]}" "${FLAGS[@]}" "$@"
++emmake make -j2
+diff --git a/build/lame.sh b/build/lame.sh
+index 59e6758..74f8de6 100755
+--- a/build/lame.sh
++++ b/build/lame.sh
+@@ -12,4 +12,4 @@ CONF_FLAGS=(
+   --disable-gtktest
+ )
+ CFLAGS=$CFLAGS emconfigure ./configure "${CONF_FLAGS[@]}"
+-emmake make install -j
++emmake make install -j2
+diff --git a/build/ogg.sh b/build/ogg.sh
+index 178601d..1ebad49 100755
+--- a/build/ogg.sh
++++ b/build/ogg.sh
+@@ -12,4 +12,4 @@ CONF_FLAGS=(
+ 
+ emconfigure ./autogen.sh
+ emconfigure ./configure "${CONF_FLAGS[@]}"
+-emmake make install -j
++emmake make install -j2
+diff --git a/build/opus.sh b/build/opus.sh
+index 0cd9faa..811ed10 100755
+--- a/build/opus.sh
++++ b/build/opus.sh
+@@ -16,4 +16,4 @@ CONF_FLAGS=(
+ 
+ emconfigure ./autogen.sh
+ CFLAGS=$CFLAGS emconfigure ./configure "${CONF_FLAGS[@]}"
+-emmake make install -j
++emmake make install -j2
+diff --git a/build/vorbis.sh b/build/vorbis.sh
+index 5c90655..a196ee8 100755
+--- a/build/vorbis.sh
++++ b/build/vorbis.sh
+@@ -17,4 +17,4 @@ CONF_FLAGS=(
+ )
+ 
+ emconfigure ./autogen.sh "${CONF_FLAGS[@]}"
+-emmake make install -j
++emmake make install -j2
