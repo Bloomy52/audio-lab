@@ -1,0 +1,97 @@
+{
+  "version": "ffmpeg version 5.1.4 Copyright (c) 2000-2023 the FFmpeg developers\nbuilt with emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.61 (67fa4c16496b157a7fc3377afd69ee0445e8a6e3)\nconfiguration: --target-os=none --arch=x86_32 --enable-cross-compile --disable-asm --disable-stripping --disable-programs --disable-doc --disable-debug --disable-runtime-cpudetect --disable-autodetect --nm=emnm --ar=emar --ranlib=emranlib --cc=emcc --cxx=em++ --objcc=emcc --dep-cc=emcc --extra-cflags='-I/opt/include -O3 -msimd128' --extra-cxxflags='-I/opt/include -O3 -msimd128' --disable-pthreads --disable-w32threads --disable-os2threads --disable-gpl --disable-nonfree --disable-everything --disable-autodetect --disable-doc --disable-network --disable-postproc --disable-programs --enable-avutil --enable-avcodec --enable-avformat --enable-avfilter --enable-swresample --enable-libmp3lame --enable-libvorbis --enable-libopus --enable-zlib --enable-protocol=file --enable-encoder='pcm_s16le,pcm_s24le,pcm_s32le' --enable-encoder='pcm_s16be,pcm_s24be,pcm_s32be' --enable-encoder=pcm_f32le --enable-encoder='adpcm_ima_wav,adpcm_ms,adpcm_yamaha' --enable-encoder='flac,alac,aac,ac3,wmav2' --enable-encoder='libmp3lame,libvorbis,libopus' --enable-muxer='wav,aiff,flac,ipod,mp3,ogg,opus,adts,webm,asf,ac3,pcm_s16le' --enable-demuxer='wav,aiff,flac,mp3,ogg,matroska,mov,aac,ac3,asf' --enable-parser='aac,ac3,flac,mpegaudio,opus,vorbis' --enable-decoder='pcm_s8,pcm_u8,pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be' --enable-decoder='pcm_s32le,pcm_s32be,pcm_f32le,pcm_f32be,pcm_f64le,pcm_f64be' --enable-decoder='adpcm_ima_wav,adpcm_ms,adpcm_yamaha' --enable-decoder='flac,mp3,mp3float,vorbis,opus,aac,alac,ac3' --enable-decoder='wmav1,wmav2' --enable-filter='acompressor,loudnorm,alimiter' --enable-filter='abuffer,abuffersink,aformat,aresample,anull,atrim'\nlibavutil      57. 28.100 / 57. 28.100\nlibavcodec     59. 37.100 / 59. 37.100\nlibavformat    59. 27.100 / 59. 27.100\nlibavdevice    59.  7.100 / 59.  7.100\nlibavfilter     8. 44.100 /  8. 44.100\nlibswscale      6.  7.100 /  6.  7.100\nlibswresample   4.  7.100 /  4.  7.100\nAborted()",
+  "license": "ffmpeg version 5.1.4 Copyright (c) 2000-2023 the FFmpeg developers\n  built with emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.61 (67fa4c16496b157a7fc3377afd69ee0445e8a6e3)\n  configuration: --target-os=none --arch=x86_32 --enable-cross-compile --disable-asm --disable-stripping --disable-programs --disable-doc --disable-debug --disable-runtime-cpudetect --disable-autodetect --nm=emnm --ar=emar --ranlib=emranlib --cc=emcc --cxx=em++ --objcc=emcc --dep-cc=emcc --extra-cflags='-I/opt/include -O3 -msimd128' --extra-cxxflags='-I/opt/include -O3 -msimd128' --disable-pthreads --disable-w32threads --disable-os2threads --disable-gpl --disable-nonfree --disable-everything --disable-autodetect --disable-doc --disable-network --disable-postproc --disable-programs --enable-avutil --enable-avcodec --enable-avformat --enable-avfilter --enable-swresample --enable-libmp3lame --enable-libvorbis --enable-libopus --enable-zlib --enable-protocol=file --enable-encoder='pcm_s16le,pcm_s24le,pcm_s32le' --enable-encoder='pcm_s16be,pcm_s24be,pcm_s32be' --enable-encoder=pcm_f32le --enable-encoder='adpcm_ima_wav,adpcm_ms,adpcm_yamaha' --enable-encoder='flac,alac,aac,ac3,wmav2' --enable-encoder='libmp3lame,libvorbis,libopus' --enable-muxer='wav,aiff,flac,ipod,mp3,ogg,opus,adts,webm,asf,ac3,pcm_s16le' --enable-demuxer='wav,aiff,flac,mp3,ogg,matroska,mov,aac,ac3,asf' --enable-parser='aac,ac3,flac,mpegaudio,opus,vorbis' --enable-decoder='pcm_s8,pcm_u8,pcm_s16le,pcm_s16be,pcm_s24le,pcm_s24be' --enable-decoder='pcm_s32le,pcm_s32be,pcm_f32le,pcm_f32be,pcm_f64le,pcm_f64be' --enable-decoder='adpcm_ima_wav,adpcm_ms,adpcm_yamaha' --enable-decoder='flac,mp3,mp3float,vorbis,opus,aac,alac,ac3' --enable-decoder='wmav1,wmav2' --enable-filter='acompressor,loudnorm,alimiter' --enable-filter='abuffer,abuffersink,aformat,aresample,anull,atrim'\n  libavutil      57. 28.100 / 57. 28.100\n  libavcodec     59. 37.100 / 59. 37.100\n  libavformat    59. 27.100 / 59. 27.100\n  libavdevice    59.  7.100 / 59.  7.100\n  libavfilter     8. 44.100 /  8. 44.100\n  libswscale      6.  7.100 /  6.  7.100\n  libswresample   4.  7.100 /  4.  7.100\nSplitting the commandline.\nReading option '-nostdin' ... matched as option 'stdin' (enable or disable interaction on standard input) with argument 0.\nReading option '-y' ... matched as option 'y' (overwrite output files) with argument '1'.\nReading option '-nostdin' ... matched as option 'stdin' (enable or disable interaction on standard input) with argument 0.\nReading option '-y' ... matched as option 'y' (overwrite output files) with argument '1'.\nReading option '-L' ... matched as option 'L' (show license) with argument '(null)'.\nFinished splitting the commandline.\nParsing a group of options: global .\nApplying option nostdin (enable or disable interaction on standard input) with argument 0.\nApplying option y (overwrite output files) with argument 1.\nApplying option nostdin (enable or disable interaction on standard input) with argument 0.\nApplying option y (overwrite output files) with argument 1.\nApplying option L (show license) with argument (null).\nffmpeg is free software; you can redistribute it and/or\nmodify it under the terms of the GNU Lesser General Public\nLicense as published by the Free Software Foundation; either\nversion 2.1 of the License, or (at your option) any later version.\n\nffmpeg is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU\nLesser General Public License for more details.\n\nYou should have received a copy of the GNU Lesser General Public\nLicense along with ffmpeg; if not, write to the Free Software\nFoundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA\nAborted()",
+  "formats": [
+    {
+      "name": "wav16",
+      "size": 384078
+    },
+    {
+      "name": "wav24",
+      "size": 576102
+    },
+    {
+      "name": "wav32",
+      "size": 768102
+    },
+    {
+      "name": "float",
+      "size": 768114
+    },
+    {
+      "name": "ima",
+      "size": 97374
+    },
+    {
+      "name": "ms",
+      "size": 97404
+    },
+    {
+      "name": "yamaha",
+      "size": 96348
+    },
+    {
+      "name": "aiff16",
+      "size": 384054
+    },
+    {
+      "name": "aiff24",
+      "size": 576054
+    },
+    {
+      "name": "aiff32",
+      "size": 768054
+    },
+    {
+      "name": "flac",
+      "size": 34804
+    },
+    {
+      "name": "alac",
+      "size": 43050
+    },
+    {
+      "name": "mp3",
+      "size": 32877
+    },
+    {
+      "name": "vorbis",
+      "size": 10509
+    },
+    {
+      "name": "opus",
+      "size": 29642
+    },
+    {
+      "name": "aac-m4a",
+      "size": 33559
+    },
+    {
+      "name": "aac",
+      "size": 33037
+    },
+    {
+      "name": "webm",
+      "size": 30472
+    },
+    {
+      "name": "wma",
+      "size": 38944
+    },
+    {
+      "name": "ac3",
+      "size": 48384
+    },
+    {
+      "name": "raw",
+      "size": 384000
+    }
+  ],
+  "filtersAndProbe": "passed",
+  "bytes": {
+    "custom": 4057520,
+    "stock": 32232419,
+    "customGzip": 1524109,
+    "stockGzip": 10227354
+  }
+}
