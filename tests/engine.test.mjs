@@ -132,29 +132,9 @@ test("target-size output is checked against actual decimal bytes", async () => {
   );
 });
 test("audio extraction excludes picture/video streams", async () => {
-  await service.inspectAudio(sine(), "wav");
-  const fixtureEngine = new CoreAdapter();
-  await fixtureEngine.load();
-  const core = fixtureEngine.core;
-  core.FS.writeFile("sine.wav", sine());
-  assert.equal(
-    core.exec(
-      "-f",
-      "lavfi",
-      "-i",
-      "color=c=black:s=32x32:r=1:d=1",
-      "-i",
-      "sine.wav",
-      "-c:v",
-      "libx264",
-      "-c:a",
-      "aac",
-      "fixture.mp4",
-    ),
-    0,
-  );
-  core.reset();
-  const video = core.FS.readFile("fixture.mp4").slice();
+  const video = new Uint8Array(fs.readFileSync(
+    new URL("./fixtures/video-with-audio.mp4", import.meta.url),
+  ));
   await assert.rejects(
       service.transcodeAudio(video.slice(), "mp4", defaultOptions()),
       /video file/,
@@ -176,11 +156,15 @@ test("pre-cancelled jobs do not run", async () => {
     (e) => e.name === "AbortError",
   );
 });
-test("checked-in local core assets are present", () => {
-  assert.ok(
-    fs.statSync(new URL("../public/ffmpeg/ffmpeg-core.wasm", import.meta.url))
-      .size > 30_000_000,
-  );
+test("checked-in custom core matches the installed public assets", () => {
+  for (const file of ["ffmpeg-core.js", "ffmpeg-core.wasm"]) {
+    assert.deepEqual(
+      fs.readFileSync(new URL(`../public/ffmpeg/${file}`, import.meta.url)),
+      fs.readFileSync(new URL(`../vendor/ffmpeg/${file}`, import.meta.url)),
+    );
+  }
+  const wasm = fs.readFileSync(new URL("../public/ffmpeg/ffmpeg-core.wasm", import.meta.url));
+  assert.deepEqual([...wasm.subarray(0, 4)], [0, 97, 115, 109]);
 });
 
 test("all offered sample rates encode with their default codec settings", async () => {
