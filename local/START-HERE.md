@@ -8,8 +8,8 @@ This reqires Node.js 24 or newer (including npm) to run. If you have not instale
 3. Open a terminal in that folder. On Windows, open the folder in File Explorer,
    right-click an empty area and choose **Open in Terminal**. On macOS/Linux,
    open Terminal and run `cd "/path/to/extracted/audio-lab-local"`, replacing the path.
-4. Run `npm install`. This first-time setup needs internet access and downloads
-   the audio engine. Wait until it finishes without errors.
+4. Run `npm install` and wait for setup to finish. The audio engine is included
+   in the ZIP.
 5. Run `npm start`. Audio Lab opens in your default browser. If it does not,
    open the printed `http://127.0.0.1:...` address manually.
 
@@ -24,8 +24,7 @@ Audio is processed in your browser and is never uploaded. Browser support for
 playing exported formats varies; a downloaded file can still be valid even if
 the browser cannot play it.
 
-If setup was interrupted or the engine is missing, rerun `npm install` with an
-internet connection. Do not disable npm install scripts: they prepare the engine.
+If the engine is missing, extract a complete release ZIP again.
 If `node` or `npm` is not recognized, install Node.js and reopen your terminal.
 
 To update, download and extract a new release into a new folder, then repeat
