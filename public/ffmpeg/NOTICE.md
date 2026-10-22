@@ -1,13 +1,11 @@
 # Bundled FFmpeg WebAssembly core
 
-Package: @ffmpeg/core 0.12.10 (single-thread build), pinned in package-lock.json.
+Audio Lab uses a custom single-thread audio-only FFmpeg 5.1.4 core, compiled
+with Emscripten 3.1.61. The generated core reports LGPL 2.1 or later.
+GPL and nonfree components are disabled. Linked external audio libraries are
+LAME, Ogg, Vorbis, Opus, and zlib; their respective license terms also apply.
+The JavaScript wrapper @ffmpeg/ffmpeg is a separate package.
 
-Upstream package metadata identifies the core's license as GPL-2.0-or-later. FFmpeg and the enabled codec libraries have their own upstream notices and license terms. The wrapper @ffmpeg/ffmpeg is a separate package.
-
-- Core package and exact release artifact: https://www.npmjs.com/package/@ffmpeg/core/v/0.12.10
-- Exact package archive: https://registry.npmjs.org/@ffmpeg/core/-/core-0.12.10.tgz
-- Source repository and build instructions: https://github.com/ffmpegwasm/ffmpeg.wasm
-- FFmpeg source: https://github.com/FFmpeg/FFmpeg
-- FFmpeg licensing information: https://ffmpeg.org/legal.html
-
-The bundled JS/WASM files are copied without modification from this exact npm package by scripts/sync-engine.mjs. They are served from the same origin as Audio Lab. Keep this notice with distributions and review the upstream distribution/source requirements before publishing a modified engine.
+- FFmpeg source: https://github.com/FFmpeg/FFmpeg/tree/n5.1.4
+- WASM bindings source: https://github.com/ffmpegwasm/ffmpeg.wasm/tree/f876f907c7e9b9bf51d4ed0b913a855a63ae63fc
+- FFmpeg licensing: https://ffmpeg.org/legal.html
