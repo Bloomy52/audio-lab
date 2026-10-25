@@ -53,6 +53,40 @@ test("WAV inclusive endpoints translate to exclusive internal frames", () => {
   assert.equal(parsed.loop.loopEndSample, 48000);
   assert.equal(parsed.loop.loopLengthSamples, 48000);
 });
+test("unsupported WAV settings retain bounds and export as standard forward loops", () => {
+  for (const [type, fraction, count] of [
+    [1024, 0, 0],
+    [1, 0, 0],
+    [2, 0, 0],
+    [0, 2147483648, 0],
+    [0, 0, 3],
+  ]) {
+    const data = injectLoopChunks(
+      sine(),
+      "wav",
+      loopFromFrames(123, 47000, 48000),
+      48000,
+    );
+    const view = new DataView(data.buffer);
+    const chunk = data.length - 68;
+    view.setUint32(chunk + 48, type, true);
+    view.setUint32(chunk + 60, fraction, true);
+    view.setUint32(chunk + 64, count, true);
+    const parsed = readAudioMetadata(data);
+    assert.equal(parsed.loop.loopStartSample, 123);
+    assert.equal(parsed.loop.loopEndSample, 47000);
+    assert.match(parsed.warnings[0], /converted to a standard forward loop/);
+    const exported = injectLoopChunks(data, "wav", parsed.loop, 48000);
+    assert.deepEqual(readAudioMetadata(exported).warnings, []);
+    assert.deepEqual(readAudioMetadata(exported).loop, parsed.loop);
+    assert.deepEqual(exported.slice(0, chunk), data.slice(0, chunk));
+    view.setUint32(chunk + 56, 48000, true);
+    const invalid = readAudioMetadata(data);
+    assert.equal(invalid.loop, undefined);
+    assert.equal(invalid.warnings.length, 1);
+    assert.match(invalid.warnings[0], /outside the audio/);
+  }
+});
 test("metadata replacement does not duplicate smpl chunks", () => {
   const a = injectLoopChunks(
     sine(),
