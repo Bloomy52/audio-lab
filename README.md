@@ -56,18 +56,18 @@ Audio Lab opens in your default browser. See [`local/START-HERE.md`](local/START
 - Processing and resampling are not bit-perfect, so no such claim is made for them.
 - Output contains audio only. Artwork and other data streams are excluded.
 - Descriptive metadata is not copied to outputs. Loop markers are preserved where the format supports them, and positions are rescaled after resampling.
-- Only one loop is preserved. Reverse, ping-pong, finite, and release loops are reported and ignored.
+- Only one loop is preserved. Unsupported WAV loop settings (including custom types, reverse, ping-pong, fractional offsets, and finite repeat counts) are converted to a forward loop that repeats indefinitely, with a note. Valid start and end markers are retained on whole sample frames; the audio is unchanged. Unsupported AIFF ping-pong sustain loops and release loops are reported and ignored.
 - Raw PCM export is headerless signed 16-bit little-endian. Note the sample rate and channel count shown with the result when importing it elsewhere.
 - AMR export is not available in the bundled FFmpeg build.
 - File-size mode targets decimal megabytes and checks the actual output size. If the budget can't be met, it fails with an explanation instead of returning an oversized file.
 
 ### Limits
 
-| Limit | Value |
-| --- | --- |
-| Input file size | 128 MiB |
-| Batch queue | 50 files, 192 MiB total input |
-| Retained batch output | 192 MiB |
+| Limit                 | Value                             |
+| --------------------- | --------------------------------- |
+| Input file size       | 128 MiB                           |
+| Batch queue           | 50 files, 192 MiB total input     |
+| Retained batch output | 192 MiB                           |
 | Studio working memory | 192 MiB of PCM, including repeats |
 
 These limits reduce the risk of browser crashes but can't guarantee enough memory on every device. Jobs run one at a time and can be cancelled, except ZIP creation, which cannot be cancelled once it starts.
@@ -75,6 +75,7 @@ These limits reduce the risk of browser crashes but can't guarantee enough memor
 Browser playback depends on the codec. An exported file can be valid even if the in-page player can't play it.
 
 ## Custom audio engine
+
 To keep size small, we built our own audio-only FFmpeg core wasm configuration.
 
 You can find more information about this build in [vendor/ffmpeg/AUDIO-BUILD.md](vendor/ffmpeg/AUDIO-BUILD.md).
