@@ -58,6 +58,7 @@ export function readAudioMetadata(
   const result: MetadataResult = { warnings: [] };
   const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let bounds: [number, number] | undefined;
+  let conversionNote: string | undefined;
   let source: LoopMetadata["source"];
   const comments = new Map<string, string>();
   const readComments = (data: Uint8Array, offset: number) => {
@@ -125,24 +126,16 @@ export function readAudioMetadata(
           if (36 + count * 24 > n) throw new Error("Truncated sampler loops");
           if (count > 1)
             result.warnings.push(
-              "Only the first forward sustain loop is used; additional loops are not preserved.",
+              "Only the first WAV loop is used; additional loops are not preserved.",
             );
           if (count) {
-            if (
-              v.getUint32(p + 40, true) !== 0 ||
-              v.getUint32(p + 52, true) !== 0 ||
-              v.getUint32(p + 56, true) !== 0
-            )
-              result.warnings.push(
-                "Unsupported reverse/ping-pong, fractional, or finite loop ignored.",
-              );
-            else {
-              bounds = [
-                v.getUint32(p + 44, true),
-                v.getUint32(p + 48, true) + 1,
-              ];
-              source = "wav_smpl";
-            }
+            const type = v.getUint32(p + 40, true);
+            const fraction = v.getUint32(p + 52, true);
+            const playCount = v.getUint32(p + 56, true);
+            if (type !== 0 || fraction !== 0 || playCount !== 0)
+              conversionNote = `WAV loop settings (type ${type}, fractional offset ${fraction}, play count ${playCount}) converted to a standard forward loop that repeats indefinitely. Start and end markers are retained on whole sample frames; audio is unchanged. Exports with loop metadata enabled use this converted loop.`;
+            bounds = [v.getUint32(p + 44, true), v.getUint32(p + 48, true) + 1];
+            source = "wav_smpl";
           }
         }
         if (!le && id === "MARK") {
@@ -261,6 +254,7 @@ export function readAudioMetadata(
         throw new Error("Source sample rate required for loop metadata");
       result.loop = loopFromFrames(bounds[0], bounds[1], rate, source);
       if (result.frames) validateLoop(result.loop, result.frames);
+      if (conversionNote) result.warnings.push(conversionNote);
     }
   } catch (err) {
     result.loop = undefined;
