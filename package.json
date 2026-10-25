@@ -4,6 +4,7 @@
   "version": "0.4.0",
   "type": "module",
   "scripts": {
+    "start": "npm run build && node local/server.mjs dist",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint src tests scripts local vite.config.ts playwright.config.ts",

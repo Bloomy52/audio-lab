@@ -5,7 +5,10 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const directory = resolve(process.argv[2]);
-const server = spawn(process.execPath, [resolve(directory, "server.mjs")], {
+const app = process.argv[3] ? resolve(process.argv[3]) : resolve(directory, "app");
+const args = [resolve(directory, "server.mjs")];
+if (process.argv[3]) args.push(app);
+const server = spawn(process.execPath, args, {
   cwd: directory,
   env: { ...process.env, AUDIO_LAB_NO_OPEN: "1" },
   stdio: ["ignore", "pipe", "pipe"],
@@ -31,7 +34,7 @@ try {
     const response = await fetch(`${url}/ffmpeg/${file}`);
     assert.equal(response.status, 200);
     assert.match(response.headers.get("content-type"), new RegExp(type));
-    assert.deepEqual(Buffer.from(await response.arrayBuffer()), await readFile(resolve(directory, "app/ffmpeg", file)));
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), await readFile(resolve(app, "ffmpeg", file)));
   }
   assert.equal((await fetch(`${url}/package.json`)).status, 404);
   assert.equal((await fetch(`${url}/%2e%2e%2fpackage.json`)).status, 403);

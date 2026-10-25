@@ -5,7 +5,9 @@ import { createServer } from "node:http";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = fileURLToPath(new URL("./app/", import.meta.url));
+const root = process.argv[2]
+  ? resolve(process.argv[2])
+  : fileURLToPath(new URL("./app/", import.meta.url));
 if (Number(process.versions.node.split(".")[0]) < 24) {
   console.error("Audio Lab requires Node.js 24 or newer. Install it from https://nodejs.org/");
   process.exit(1);
@@ -15,7 +17,9 @@ try {
   await access(resolve(root, "ffmpeg/ffmpeg-core.wasm"));
   await access(resolve(root, "ffmpeg/ffmpeg-core.js"));
 } catch {
-  console.error("Audio Lab files are incomplete. Extract a complete Local Edition ZIP again.");
+  console.error(process.argv[2]
+    ? "Audio Lab's production build is incomplete. Run npm run build and try again."
+    : "Audio Lab files are incomplete. Extract a complete Local Edition ZIP again.");
   process.exit(1);
 }
 
