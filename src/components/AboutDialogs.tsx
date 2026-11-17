@@ -62,10 +62,8 @@ export function AboutDialogs({ version }: { version: string }) {
           <summary>Full MIT License text</summary>
           <pre tabIndex={0}>{licenseText}</pre>
         </details>
-        <h3>Runtime dependencies</h3>
-        <DependencyList items={dependencies.filter((d) => !d.dev)} />
-        <h3>Development dependencies</h3>
-        <DependencyList items={dependencies.filter((d) => d.dev)} />
+        <h3>Dependencies</h3>
+        <DependencyList items={dependencies} />
         <form method="dialog">
           <button autoFocus>Close</button>
         </form>

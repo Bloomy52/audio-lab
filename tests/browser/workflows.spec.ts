@@ -417,15 +417,15 @@ test("footer opens About and third-party licenses dialogs and links to source", 
       "utf8",
     ),
   );
-  for (const name of ["react", "jszip", "@ffmpeg/ffmpeg", "vite"]) {
+  const items = about.locator(".deps li");
+  await expect(items).toHaveCount(Object.keys(pkg.dependencies).length);
+  for (const name of Object.keys(pkg.dependencies)) {
     const version = lock.packages[`node_modules/${name}`].version;
     await expect(
-      about
-        .locator("li", { hasText: name })
-        .filter({ hasText: version })
-        .first(),
+      items.filter({ hasText: `${name} ${version}` }).first(),
     ).toBeVisible();
   }
+  await expect(about).not.toContainText("Development dependencies");
   await page.keyboard.press("Escape");
   await expect(about).not.toBeVisible();
   await page.getByRole("button", { name: "Third-party licenses" }).click();
