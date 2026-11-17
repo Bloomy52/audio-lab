@@ -8,7 +8,8 @@ const isolation = {
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Embedder-Policy": "require-corp",
 };
-// Exposes the package-lock.json package list to the About dialog.
+// Exposes the direct dependencies, at their package-lock.json versions, to
+// the About dialog.
 const lockfile = (): Plugin => {
   const id = "virtual:dependencies";
   return {
@@ -16,18 +17,16 @@ const lockfile = (): Plugin => {
     resolveId: (source) => (source === id ? `\0${id}` : undefined),
     load(resolved) {
       if (resolved !== `\0${id}`) return;
+      const pkg = JSON.parse(readFileSync("package.json", "utf8"));
       const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
+      this.addWatchFile("package.json");
       this.addWatchFile("package-lock.json");
-      const dependencies = Object.entries<{ version: string; dev?: boolean }>(
-        lock.packages,
-      )
-        .filter(([path]) => path.includes("node_modules/"))
-        .map(([path, { version, dev }]) => ({
-          name: path.slice(path.lastIndexOf("node_modules/") + 13),
-          version,
-          dev: !!dev,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+      const dependencies = Object.keys(pkg.dependencies)
+        .sort((a, b) => a.localeCompare(b))
+        .map((name) => ({
+          name,
+          version: lock.packages[`node_modules/${name}`].version,
+        }));
       return `export default ${JSON.stringify(dependencies)};`;
     },
   };
