@@ -42,8 +42,8 @@ export function Header({
         </p>
         <p>
           Switching between workspaces preserves your edits and batch. Jobs run
-          one at a time and can be cancelled. The single-thread engine works
-          without cross-origin isolation.
+          one at a time and can be cancelled. The multithread engine needs
+          cross-origin isolation, which Audio Lab sets up automatically.
         </p>
         <p>
           Valid WAV, AIFF, FLAC, Vorbis, and Opus loop markers can be retained.
