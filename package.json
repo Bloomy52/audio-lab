@@ -2,6 +2,8 @@
   "name": "audio-lab",
   "private": true,
   "version": "0.5.1",
+  "author": "Louie Bloomberg",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "start": "npm run build && node local/server.mjs dist",
