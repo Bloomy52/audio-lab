@@ -254,6 +254,32 @@ footer {
   text-align: center;
   font-size: 0.8rem;
 }
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+.footer-links a,
+.footer-links .link {
+  color: #9fd0ff;
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+dialog pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 50vh;
+  overflow: auto;
+  font-size: 0.75rem;
+  background: #07101f;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}
 dialog {
   max-width: 650px;
   width: calc(100% - 2rem);

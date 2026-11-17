@@ -396,6 +396,30 @@ test("trusted AIFF loop-region export has exactly the original selected PCM", as
   expect(actual).toBe(expected);
 });
 
+test("footer opens About and third-party licenses dialogs and links to source", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "About", exact: true }).click();
+  const about = page.getByRole("dialog", { name: "About Audio Lab" });
+  await expect(about).toBeVisible();
+  await expect(about).toContainText("Copyright (c) 2026 Louie Bloomberg");
+  await expect(about).toContainText("MIT License");
+  await page.keyboard.press("Escape");
+  await expect(about).not.toBeVisible();
+  await page.getByRole("button", { name: "Third-party licenses" }).click();
+  const licenses = page.getByRole("dialog", { name: "Third-party licenses" });
+  await expect(licenses).toBeVisible();
+  await expect(licenses).toContainText(
+    "THIRD-PARTY SOFTWARE NOTICES AND LICENSES",
+  );
+  await page.keyboard.press("Escape");
+  await expect(licenses).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Source code" })).toHaveAttribute(
+    "href",
+    "https://github.com/Bloomy52/audio-lab",
+  );
+});
 test("built site works from a GitHub Pages-style subdirectory without external requests", async ({
   browser,
 }) => {
