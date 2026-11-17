@@ -407,7 +407,10 @@ test("footer opens About and third-party licenses dialogs and links to source", 
   await expect(about).toContainText(
     "This project is licensed under the MIT License.",
   );
-  await expect(about).toContainText("Version 0.5.0");
+  const pkg = JSON.parse(
+    fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
+  );
+  await expect(about).toContainText(`Version ${pkg.version}`);
   const lock = JSON.parse(
     fs.readFileSync(
       new URL("../../package-lock.json", import.meta.url),
