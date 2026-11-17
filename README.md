@@ -81,3 +81,4 @@ To keep size small, we built our own audio-only FFmpeg core wasm configuration.
 You can find more information about this build in [vendor/ffmpeg/AUDIO-BUILD.md](vendor/ffmpeg/AUDIO-BUILD.md).
 
 ## License
+Audio Lab is licensed under the MIT License. See [LICENSE](LICENSE) for details. FFmpeg and other libraries used in the project are licensed under their own licenses. See [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES.txt) for details.
