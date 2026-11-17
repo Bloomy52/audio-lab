@@ -1,8 +1,16 @@
 diff --git a/build/ffmpeg-wasm.sh b/build/ffmpeg-wasm.sh
-index faa2f72..73a94f2 100755
+index faa2f72..7d838d5 100755
 --- a/build/ffmpeg-wasm.sh
 +++ b/build/ffmpeg-wasm.sh
-@@ -17,7 +17,6 @@ CONF_FLAGS=(
+@@ -10,6 +10,7 @@ EXPORT_NAME="createFFmpegCore"
+ CONF_FLAGS=(
+   -I. 
+   -I./src/fftools 
++  -I./compat/stdbit 
+   -I$INSTALL_DIR/include 
+   -L$INSTALL_DIR/lib 
+   -Llibavcodec 
+@@ -17,7 +18,6 @@ CONF_FLAGS=(
    -Llibavfilter 
    -Llibavformat 
    -Llibavutil 
@@ -10,7 +18,7 @@ index faa2f72..73a94f2 100755
    -Llibswresample 
    -Llibswscale 
    -lavcodec 
-@@ -25,14 +24,12 @@ CONF_FLAGS=(
+@@ -25,17 +25,16 @@ CONF_FLAGS=(
    -lavfilter 
    -lavformat 
    -lavutil 
@@ -19,14 +27,39 @@ index faa2f72..73a94f2 100755
    -lswscale 
    -Wno-deprecated-declarations 
    $LDFLAGS 
-   -sENVIRONMENT=worker
+-  -sENVIRONMENT=worker
++  -sENVIRONMENT=${CORE_ENV:-worker}
    -sWASM_BIGINT                            # enable big int support
 -  -sUSE_SDL=2                              # use emscripten SDL2 lib port
    -sSTACK_SIZE=5MB                         # increase stack size to support libopus
    -sMODULARIZE                             # modularized to use as a library
    ${FFMPEG_MT:+ -sINITIAL_MEMORY=1024MB}   # ALLOW_MEMORY_GROWTH is not recommended when using threads, thus we use a large initial memory
++  ${FFMPEG_MT:+ -pthread}
+   ${FFMPEG_MT:+ -sPTHREAD_POOL_SIZE=32}    # use 32 threads
+   ${FFMPEG_ST:+ -sINITIAL_MEMORY=32MB -sALLOW_MEMORY_GROWTH} # Use just enough memory as memory usage can grow
+   -sEXPORT_NAME="$EXPORT_NAME"             # required in browser env, so that user can access this module from window object
+@@ -46,11 +45,19 @@ CONF_FLAGS=(
+   # ffmpeg source code
+   src/fftools/cmdutils.c 
+   src/fftools/ffmpeg.c 
++  src/fftools/ffmpeg_dec.c 
++  src/fftools/ffmpeg_demux.c 
++  src/fftools/ffmpeg_enc.c 
+   src/fftools/ffmpeg_filter.c 
+   src/fftools/ffmpeg_hw.c 
+   src/fftools/ffmpeg_mux.c 
++  src/fftools/ffmpeg_mux_init.c 
+   src/fftools/ffmpeg_opt.c 
++  src/fftools/ffmpeg_sched.c 
++  src/fftools/objpool.c 
+   src/fftools/opt_common.c 
++  src/fftools/sync_queue.c 
++  src/fftools/thread_queue.c 
+   src/fftools/ffprobe.c 
+ )
+ 
 diff --git a/build/ffmpeg.sh b/build/ffmpeg.sh
-index da89c45..52c0a38 100755
+index da89c45..8c39c63 100755
 --- a/build/ffmpeg.sh
 +++ b/build/ffmpeg.sh
 @@ -29,5 +29,6 @@ CONF_FLAGS=(
@@ -37,7 +70,7 @@ index da89c45..52c0a38 100755
 -emmake make -j
 +source /src/audio-core-flags.sh
 +emconfigure ./configure "${CONF_FLAGS[@]}" "${FLAGS[@]}" "$@"
-+emmake make -j2
++emmake make -j"$(nproc)"
 diff --git a/build/lame.sh b/build/lame.sh
 index 59e6758..74f8de6 100755
 --- a/build/lame.sh
@@ -78,3 +111,41 @@ index 5c90655..a196ee8 100755
  emconfigure ./autogen.sh "${CONF_FLAGS[@]}"
 -emmake make install -j
 +emmake make install -j2
+diff --git a/src/bind/ffmpeg/bind.js b/src/bind/ffmpeg/bind.js
+index 14eec22..81006a5 100644
+--- a/src/bind/ffmpeg/bind.js
++++ b/src/bind/ffmpeg/bind.js
+@@ -55,7 +55,8 @@ function printErr(message) {
+ function exec(..._args) {
+   const args = [...Module["DEFAULT_ARGS"], ..._args];
+   try {
+-    Module["_ffmpeg"](args.length, stringsToPtr(args));
++    // FFmpeg 7.x returns normally instead of aborting, so take the exit code here.
++    Module["ret"] = Module["_ffmpeg"](args.length, stringsToPtr(args));
+   } catch (e) {
+     if (!e.message.startsWith("Aborted")) {
+       throw e;
+@@ -67,7 +68,8 @@ function exec(..._args) {
+ function ffprobe(..._args) {
+   const args = [...Module["DEFAULT_ARGS_FFPROBE"], ..._args];
+   try {
+-    Module["_ffprobe"](args.length, stringsToPtr(args));
++    // FFmpeg 7.x returns normally instead of aborting, so take the exit code here.
++    Module["ret"] = Module["_ffprobe"](args.length, stringsToPtr(args));
+   } catch (e) {
+     if (!e.message.startsWith("Aborted")) {
+       throw e;
+diff --git a/src/bind/ffmpeg/export-runtime.js b/src/bind/ffmpeg/export-runtime.js
+index 7f74da3..bc1e2db 100644
+--- a/src/bind/ffmpeg/export-runtime.js
++++ b/src/bind/ffmpeg/export-runtime.js
+@@ -7,4 +7,9 @@ const EXPORTED_RUNTIME_METHODS = [
+   "stringToUTF8",
+ ];
+ 
++// The Node build also exposes the pthread pool so a host can terminate its
++// workers; a browser host just terminates the whole worker.
++if ((process.env.CORE_ENV || "").includes("node"))
++  EXPORTED_RUNTIME_METHODS.push("PThread");
++
+ console.log(EXPORTED_RUNTIME_METHODS.join(","));

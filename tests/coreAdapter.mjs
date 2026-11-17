@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import createCore from "../public/ffmpeg/ffmpeg-core.js";
+import createCore from "../vendor/ffmpeg/ffmpeg-core.node.js";
 export class CoreAdapter {
   listeners = { log: new Set(), progress: new Set() };
   core = null;
@@ -48,6 +48,8 @@ export class CoreAdapter {
     this.core.FS.unlink(name);
   }
   terminate() {
+    // Dropping the reference would leave the pthread pool's Node workers alive.
+    this.core?.PThread.terminateAllThreads();
     this.core = null;
   }
 }

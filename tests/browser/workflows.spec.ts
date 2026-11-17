@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
+import http from "node:http";
+import path from "node:path";
 import { sine } from "../helpers.mjs";
 import {
   createWavSmplChunk,
@@ -397,37 +399,44 @@ test("trusted AIFF loop-region export has exactly the original selected PCM", as
 test("built site works from a GitHub Pages-style subdirectory without external requests", async ({
   browser,
 }) => {
+  // A plain static server that, like GitHub Pages, sends no isolation headers.
+  const base = new URL("../../dist/", import.meta.url);
+  const types: Record<string, string> = {
+    ".js": "application/javascript",
+    ".css": "text/css",
+    ".wasm": "application/wasm",
+    ".svg": "image/svg+xml",
+    ".html": "text/html",
+  };
+  const server = http.createServer((req, res) => {
+    const pathname = new URL(req.url!, "http://localhost").pathname;
+    if (!pathname.startsWith("/audio-lab/")) return res.writeHead(404).end();
+    const file = pathname.slice("/audio-lab/".length) || "index.html";
+    try {
+      res.writeHead(200, {
+        "Content-Type": types[path.extname(file)] ?? "application/octet-stream",
+      });
+      res.end(fs.readFileSync(new URL(file, base)));
+    } catch {
+      res.writeHead(404).end();
+    }
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const origin = `http://127.0.0.1:${(server.address() as any).port}`;
   const context = await browser.newContext();
   const requests: string[] = [];
   context.on("request", (request) => {
     requests.push(request.url());
     expect(request.method()).toBe("GET");
   });
-  await context.route("**/audio-lab/**", async (route) => {
-    const pathname = new URL(route.request().url()).pathname;
-    const file = pathname.slice("/audio-lab/".length) || "index.html";
-    const base = new URL("../../dist/", import.meta.url);
-    const contentType = file.endsWith(".js")
-      ? "application/javascript"
-      : file.endsWith(".css")
-        ? "text/css"
-        : file.endsWith(".wasm")
-          ? "application/wasm"
-          : file.endsWith(".svg")
-            ? "image/svg+xml"
-            : "text/html";
-    await route.fulfill({
-      body: fs.readFileSync(new URL(file, base)),
-      contentType,
-    });
-  });
   const page = await context.newPage();
-  await page.goto("/audio-lab/");
+  await page.goto(`${origin}/audio-lab/`);
+  // The service worker isolates the page, reloading it once.
+  await page.waitForFunction(() => self.crossOriginIsolated);
   await openAudio(page);
   const bytes = await exportFile(page);
   expect(readAudioMetadata(bytes).frames).toBe(96000);
-  expect(
-    requests.every((url) => new URL(url).origin === "http://127.0.0.1:4173"),
-  ).toBe(true);
+  expect(requests.every((url) => new URL(url).origin === origin)).toBe(true);
   await context.close();
+  server.close();
 });

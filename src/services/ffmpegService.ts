@@ -34,8 +34,13 @@ export class FFmpegService {
   private factory: () => Promise<Engine>;
   private config: () => Record<string, string>;
   constructor(
-    factory: () => Promise<Engine> = async () =>
-      new (await import("@ffmpeg/ffmpeg")).FFmpeg() as unknown as Engine,
+    factory: () => Promise<Engine> = async () => {
+      if (!self.crossOriginIsolated)
+        throw new Error(
+          "The audio engine needs a cross-origin isolated page. Reload this page; if it keeps failing, allow service workers for this site.",
+        );
+      return new (await import("@ffmpeg/ffmpeg")).FFmpeg() as unknown as Engine;
+    },
     config: () => Record<string, string> = () => ({
       coreURL: new URL(
         `${import.meta.env.BASE_URL}ffmpeg/ffmpeg-core.js`,

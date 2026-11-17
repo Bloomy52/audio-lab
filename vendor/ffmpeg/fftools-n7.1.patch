@@ -1,0 +1,339 @@
+diff -ruN a/ffmpeg.c b/ffmpeg.c
+--- a/ffmpeg.c	2026-11-17 12:44:56
++++ b/ffmpeg.c	2026-11-17 12:44:56
+@@ -30,6 +30,9 @@
+ #include <stdatomic.h>
+ #include <stdint.h>
+ #include <stdlib.h>
++#include <emscripten.h>
++
++#include "libavutil/cpu.h"
+ #include <string.h>
+ #include <time.h>
+ 
+@@ -545,6 +548,14 @@
+     }
+ }
+ 
++EM_JS(void, send_progress, (double progress, double time), {
++    Module.receiveProgress(progress, time);
++});
++
++/* Kept at file scope so init_globals() can reset them between ffmpeg() calls. */
++static int64_t report_last_time = -1;
++static int report_first = 1;
++
+ static void print_report(int is_last_report, int64_t timer_start, int64_t cur_time, int64_t pts)
+ {
+     AVBPrint buf, buf_script;
+@@ -552,8 +563,6 @@
+     int vid;
+     double bitrate;
+     double speed;
+-    static int64_t last_time = -1;
+-    static int first_report = 1;
+     uint64_t nb_frames_dup = 0, nb_frames_drop = 0;
+     int mins, secs, us;
+     int64_t hours;
+@@ -565,13 +574,13 @@
+         return;
+ 
+     if (!is_last_report) {
+-        if (last_time == -1) {
+-            last_time = cur_time;
++        if (report_last_time == -1) {
++            report_last_time = cur_time;
+         }
+-        if (((cur_time - last_time) < stats_period && !first_report) ||
+-            (first_report && atomic_load(&nb_output_dumped) < nb_output_files))
++        if (((cur_time - report_last_time) < stats_period && !report_first) ||
++            (report_first && atomic_load(&nb_output_dumped) < nb_output_files))
+             return;
+-        last_time = cur_time;
++        report_last_time = cur_time;
+     }
+ 
+     t = (cur_time-timer_start) / 1000000.0;
+@@ -617,6 +626,24 @@
+             pts -= copy_ts_first_pts;
+     }
+ 
++    /* send_progress here only works when the duration of
++     * input and output file are the same, other cases (ex. trim)
++     * still WIP.
++     *
++     * TODO: support cases like trim.
++     */
++    int64_t duration = -1;
++    int64_t pts_abs = FFABS(pts);
++    /* Use the longest duration among all input files.
++     */
++    for (int i = 0; i < nb_input_files; i++) {
++        int64_t file_duration = input_files[i]->ctx->duration;
++        if (file_duration > duration) {
++            duration = file_duration;
++        }
++    }
++    send_progress((double)pts_abs / (double)duration, (double)pts_abs);
++
+     us    = FFABS64U(pts) % AV_TIME_BASE;
+     secs  = FFABS64U(pts) / AV_TIME_BASE % 60;
+     mins  = FFABS64U(pts) / AV_TIME_BASE / 60 % 60;
+@@ -669,8 +696,14 @@
+         av_bprintf(&buf_script, "speed=%4.3gx\n", speed);
+     }
+ 
++    if (is_last_report) {
++        // Make sure the progress is ended with 1.
++        if (pts_abs != duration) send_progress(1, (double)pts_abs);
++    }
++
+     if (print_stats || is_last_report) {
+-        const char end = is_last_report ? '\n' : '\r';
++        // Always print a new line of message.
++        const char end = '\n'; //is_last_report ? '\n' : '\r';
+         if (print_stats==1 && AV_LOG_INFO > av_log_get_level()) {
+             fprintf(stderr, "%s    %c", buf.str, end);
+         } else
+@@ -694,7 +727,7 @@
+         }
+     }
+ 
+-    first_report = 0;
++    report_first = 0;
+ }
+ 
+ static void print_stream_maps(void)
+@@ -852,10 +885,21 @@
+ /*
+  * The following code is the main loop of the file converter
+  */
++/* is_timeout checks if transcode() is running longer
++ * than a timeout value, return 1 when timeout.
++ */
++EM_JS(int, is_timeout, (int64_t diff), {
++    if (Module.timeout === -1) return 0;
++    else {
++      return Module.timeout <= diff;
++    }
++});
++
+ static int transcode(Scheduler *sch)
+ {
+     int ret = 0;
+     int64_t timer_start, transcode_ts = 0;
++    int timed_out = 0;
+ 
+     print_stream_maps();
+ 
+@@ -874,6 +918,11 @@
+     while (!sch_wait(sch, stats_period, &transcode_ts)) {
+         int64_t cur_time= av_gettime_relative();
+ 
++        if (is_timeout((cur_time - timer_start) / 1000) == 1) {
++            timed_out = 1;
++            break;
++        }
++
+         /* if 'q' pressed, exits */
+         if (stdin_interaction)
+             if (check_keyboard_interaction(cur_time) < 0)
+@@ -884,6 +933,8 @@
+     }
+ 
+     ret = sch_stop(sch, &transcode_ts);
++    if (timed_out)
++        ret = 1;
+ 
+     /* write the trailer if needed */
+     for (int i = 0; i < nb_output_files; i++) {
+@@ -943,8 +994,54 @@
+ #endif
+ }
+ 
+-int main(int argc, char **argv)
++/* init_globals initializes global variables to enable multiple
++ * calls of ffmpeg().
++ *
++ * This is not required in the original command line version as
++ * the global varialbes are always re-initialized when calling
++ * main() function.
++ */
++static void init_globals(void)
+ {
++    atomic_store(&nb_output_dumped, 0);
++    progress_avio = NULL;
++
++    input_files = NULL;
++    nb_input_files = 0;
++    output_files = NULL;
++    nb_output_files = 0;
++    filtergraphs = NULL;
++    nb_filtergraphs = 0;
++    decoders = NULL;
++    nb_decoders = 0;
++
++    received_sigterm = 0;
++    received_nb_signals = 0;
++    atomic_store(&transcode_init_done, 0);
++    ffmpeg_exited = 0;
++    copy_ts_first_pts = AV_NOPTS_VALUE;
++    report_last_time = -1;
++    report_first = 1;
++}
++
++/* ffmpeg() is simply a rename of main(), but it makes things easier to
++ * control as main() is a special function name that might trigger
++ * some hidden mechanisms.
++ *
++ * One example is that when using multi-threading, a proxy_main() function
++ * might be used instead of main().
++ */
++int ffmpeg(int argc, char **argv)
++{
++    init_globals();
++
++    /* The pthread pool is created up front (-sPTHREAD_POOL_SIZE) because this
++     * thread blocks while ffmpeg runs and so cannot spawn workers later.
++     * Decoder frame threads and filtergraph slice threads are sized from the
++     * CPU count, so cap it to stay inside the pool. Audio gains nothing from
++     * more threads. */
++    av_cpu_force_count(4);
++
+     Scheduler *sch = NULL;
+ 
+     int ret;
+diff -ruN a/ffprobe.c b/ffprobe.c
+--- a/ffprobe.c	2026-11-17 12:44:56
++++ b/ffprobe.c	2026-11-17 12:44:56
+@@ -101,8 +101,8 @@
+     int       nb_streams;
+ } InputFile;
+ 
+-const char program_name[] = "ffprobe";
+-const int program_birth_year = 2007;
++const char program_name_ffprobe[] = "ffprobe";
++const int program_birth_year_ffprobe = 2007;
+ 
+ static int do_bitexact = 0;
+ static int do_count_frames = 0;
+@@ -401,6 +401,65 @@
+ static LogBuffer *log_buffer;
+ static int log_buffer_size;
+ 
++/* ffprobe() can be called many times in one process, so every global
++ * with state has to be put back to its initial value before each call. */
++static void ffprobe_reset_globals(void)
++{
++    do_bitexact = 0;
++    do_count_frames = 0;
++    do_count_packets = 0;
++    do_read_frames  = 0;
++    do_read_packets = 0;
++    do_show_chapters = 0;
++    do_show_error   = 0;
++    do_show_format  = 0;
++    do_show_frames  = 0;
++    do_show_packets = 0;
++    do_show_programs = 0;
++    do_show_stream_groups = 0;
++    do_show_stream_group_components = 0;
++    do_show_streams = 0;
++    do_show_stream_disposition = 0;
++    do_show_stream_group_disposition = 0;
++    do_show_data    = 0;
++    do_show_program_version  = 0;
++    do_show_library_versions = 0;
++    do_show_pixel_formats = 0;
++    do_show_pixel_format_flags = 0;
++    do_show_pixel_format_components = 0;
++    do_show_log = 0;
++    do_show_chapter_tags = 0;
++    do_show_format_tags = 0;
++    do_show_frame_tags = 0;
++    do_show_program_tags = 0;
++    do_show_stream_group_tags = 0;
++    do_show_stream_tags = 0;
++    do_show_packet_tags = 0;
++    show_value_unit              = 0;
++    use_value_prefix             = 0;
++    use_byte_value_binary_prefix = 0;
++    use_value_sexagesimal_format = 0;
++    show_private_data            = 1;
++    show_optional_fields = SHOW_OPTIONAL_FIELDS_AUTO;
++    output_format = NULL;
++    stream_specifier = NULL;
++    show_data_hash = NULL;
++    read_intervals = NULL;
++    read_intervals_nb = 0;
++    find_stream_info  = 1;
++    input_filename = NULL;
++    print_input_filename = NULL;
++    iformat = NULL;
++    output_filename = NULL;
++    hash = NULL;
++    nb_streams = 0;
++    nb_streams_packets = NULL;
++    nb_streams_frames = NULL;
++    selected_streams = NULL;
++    log_buffer = NULL;
++    log_buffer_size = 0;
++}
++
+ static void log_callback(void *ptr, int level, const char *fmt, va_list vl)
+ {
+     AVClass* avc = ptr ? *(AVClass **) ptr : NULL;
+@@ -4087,7 +4146,7 @@
+ static void show_usage(void)
+ {
+     av_log(NULL, AV_LOG_INFO, "Simple multimedia streams analyzer\n");
+-    av_log(NULL, AV_LOG_INFO, "usage: %s [OPTIONS] INPUT_FILE\n", program_name);
++    av_log(NULL, AV_LOG_INFO, "usage: %s [OPTIONS] INPUT_FILE\n", program_name_ffprobe);
+     av_log(NULL, AV_LOG_INFO, "\n");
+ }
+ 
+@@ -4099,7 +4158,7 @@
+     writer_print_section_header(w, NULL, SECTION_ID_PROGRAM_VERSION);
+     print_str("version", FFMPEG_VERSION);
+     print_fmt("copyright", "Copyright (c) %d-%d the FFmpeg developers",
+-              program_birth_year, CONFIG_THIS_YEAR);
++              program_birth_year_ffprobe, CONFIG_THIS_YEAR);
+     print_str("compiler_ident", CC_IDENT);
+     print_str("configuration", FFMPEG_CONFIGURATION);
+     writer_print_section_footer(w);
+@@ -4344,7 +4403,7 @@
+     return print_input_filename ? 0 : AVERROR(ENOMEM);
+ }
+ 
+-void show_help_default(const char *opt, const char *arg)
++void show_help_default_ffprobe(const char *opt, const char *arg)
+ {
+     av_log_set_callback(log_callback_help);
+     show_usage();
+@@ -4628,7 +4687,7 @@
+             do_show_##varname = 1;                                      \
+     } while (0)
+ 
+-int main(int argc, char **argv)
++int ffprobe(int argc, char **argv)
+ {
+     const Writer *w;
+     WriterContext *wctx;
+@@ -4636,6 +4695,8 @@
+     char *w_name = NULL, *w_args = NULL;
+     int ret, input_ret, i;
+ 
++    ffprobe_reset_globals();
++
+     init_dynload();
+ 
+ #if HAVE_THREADS
+@@ -4759,7 +4820,7 @@
+              (!do_show_program_version && !do_show_library_versions && !do_show_pixel_formats))) {
+             show_usage();
+             av_log(NULL, AV_LOG_ERROR, "You have to specify one input file.\n");
+-            av_log(NULL, AV_LOG_ERROR, "Use -h to get full help or, even better, run 'man %s'.\n", program_name);
++            av_log(NULL, AV_LOG_ERROR, "Use -h to get full help or, even better, run 'man %s'.\n", program_name_ffprobe);
+             ret = AVERROR(EINVAL);
+         } else if (input_filename) {
+             ret = probe_file(wctx, input_filename, print_input_filename);
