@@ -3,8 +3,14 @@
   "compilerImage": "emscripten/emsdk:3.1.61-arm64",
   "compilerImageDigest": "sha256:c8c7a4e913d36ea1a46908153cbd992d9251f10a910fb129064ce78a54fbf0c6",
   "buildPlatform": "linux/arm64",
+  "ffmpegTag": "n7.1",
+  "ffmpegCommit": "b08d7969c550a804a59511c7b83f2dd8cc0499b8",
+  "threading": "pthreads (FFMPEG_MT=yes)",
   "files": {
-    "ffmpeg-core.js": "faa9e7a2de9da9c6a87893bb099cdaa861a5f5630b228033d31c200a7b189821",
-    "ffmpeg-core.wasm": "2b797d15cd2c4f60c29c43d22a52f5198ce9ebeb8de2ba6fec6b7ea1f90e0944"
+    "ffmpeg-core.js": "7c2b90e4159261eb2d1e1341d117efedf460c7ab735cb7d32efcde1081e07c26",
+    "ffmpeg-core.wasm": "2b1b5d45cb9669d298042380575c32de8b6b6c6f1e553b114e9237aeaa8966e4"
+  },
+  "testFiles": {
+    "ffmpeg-core.node.js": "1e20e8fa12d60f7cc8c06ec37854be708b5596374d7ab0685909771c9190cb5e"
   }
 }

@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import createCore from "../public/ffmpeg/ffmpeg-core.js";
+import createCore from "../vendor/ffmpeg/ffmpeg-core.node.js";
 export class CoreAdapter {
   listeners = { log: new Set(), progress: new Set() };
   core = null;
