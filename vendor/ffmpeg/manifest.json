@@ -11,6 +11,6 @@
     "ffmpeg-core.wasm": "2b1b5d45cb9669d298042380575c32de8b6b6c6f1e553b114e9237aeaa8966e4"
   },
   "testFiles": {
-    "ffmpeg-core.node.js": "1e20e8fa12d60f7cc8c06ec37854be708b5596374d7ab0685909771c9190cb5e"
+    "ffmpeg-core.node.js": "ae42c0bff7cfd7b0073a33e81830b4bd1fa162af5d3c4a68372845ec3fe5a0f1"
   }
 }

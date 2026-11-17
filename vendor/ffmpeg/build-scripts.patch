@@ -135,3 +135,17 @@ index 14eec22..81006a5 100644
    } catch (e) {
      if (!e.message.startsWith("Aborted")) {
        throw e;
+diff --git a/src/bind/ffmpeg/export-runtime.js b/src/bind/ffmpeg/export-runtime.js
+index 7f74da3..bc1e2db 100644
+--- a/src/bind/ffmpeg/export-runtime.js
++++ b/src/bind/ffmpeg/export-runtime.js
+@@ -7,4 +7,9 @@ const EXPORTED_RUNTIME_METHODS = [
+   "stringToUTF8",
+ ];
+ 
++// The Node build also exposes the pthread pool so a host can terminate its
++// workers; a browser host just terminates the whole worker.
++if ((process.env.CORE_ENV || "").includes("node"))
++  EXPORTED_RUNTIME_METHODS.push("PThread");
++
+ console.log(EXPORTED_RUNTIME_METHODS.join(","));

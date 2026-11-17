@@ -48,6 +48,8 @@ export class CoreAdapter {
     this.core.FS.unlink(name);
   }
   terminate() {
+    // Dropping the reference would leave the pthread pool's Node workers alive.
+    this.core?.PThread.terminateAllThreads();
     this.core = null;
   }
 }
