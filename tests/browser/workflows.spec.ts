@@ -404,7 +404,25 @@ test("footer opens About and third-party licenses dialogs and links to source", 
   const about = page.getByRole("dialog", { name: "About Audio Lab" });
   await expect(about).toBeVisible();
   await expect(about).toContainText("Copyright (c) 2026 Louie Bloomberg");
-  await expect(about).toContainText("MIT License");
+  await expect(about).toContainText(
+    "This project is licensed under the MIT License.",
+  );
+  await expect(about).toContainText("Version 0.5.0");
+  const lock = JSON.parse(
+    fs.readFileSync(
+      new URL("../../package-lock.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  for (const name of ["react", "jszip", "@ffmpeg/ffmpeg", "vite"]) {
+    const version = lock.packages[`node_modules/${name}`].version;
+    await expect(
+      about
+        .locator("li", { hasText: name })
+        .filter({ hasText: version })
+        .first(),
+    ).toBeVisible();
+  }
   await page.keyboard.press("Escape");
   await expect(about).not.toBeVisible();
   await page.getByRole("button", { name: "Third-party licenses" }).click();
