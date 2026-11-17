@@ -270,6 +270,40 @@ footer {
   font: inherit;
   cursor: pointer;
 }
+.about h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.95rem;
+  color: #9fd0ff;
+}
+.about-version {
+  color: #96a9c2;
+}
+.about details {
+  margin: 0.9rem 0;
+}
+.about summary {
+  cursor: pointer;
+}
+.deps {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  max-height: 14rem;
+  overflow: auto;
+  background: #07101f;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+.deps li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.15rem 0;
+}
+.deps li span:last-child {
+  color: #96a9c2;
+  font-variant-numeric: tabular-nums;
+}
 dialog pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
