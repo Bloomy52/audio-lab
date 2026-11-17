@@ -55,6 +55,8 @@ const server = createServer(async (request, response) => {
       "Content-Type": types[extname(file)] ?? "application/octet-stream",
       "Content-Length": info.size,
       "X-Content-Type-Options": "nosniff",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
       "Cache-Control": "no-store",
     });
     if (request.method === "HEAD") response.end();
